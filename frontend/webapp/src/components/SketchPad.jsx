@@ -77,7 +77,7 @@ const SketchPad = () => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentColor, setCurrentColor] = useState("#000000");
   const [ThemeData, Setheme] = useState("Default");
-  const [additonalPrompt, setAdditonalPrompt] = useState(" ");
+  const [additionalPrompt, setAdditionalPrompt] = useState(" ");
   const [complexity, setComplexity] = useState("Standard");
 
   // Refs
@@ -384,7 +384,7 @@ const SketchPad = () => {
     const response = await CallApi(
       canvasImageDataURL,
       ThemeData,
-      additonalPrompt,
+      additionalPrompt,
 	  complexity
     );
 
@@ -446,8 +446,8 @@ const SketchPad = () => {
   };
 
   useEffect(() => {
-    console.log("Prompt", additonalPrompt);
-  }, [additonalPrompt]);
+    console.log("Prompt", additionalPrompt);
+  }, [additionalPrompt]);
 
   return (
     <div className="text-gray-900 flex flex-col md:flex-row items-center py-8 justify-center px-4">
@@ -664,7 +664,7 @@ const SketchPad = () => {
           <textarea
             className="border border-black placeholder-gray-500 px-3 py-2 rounded-lg bg-background w-full md:w-[300px] h-[250px] resize-none"
             placeholder="Additional Notes..."
-            onChange={(e) => setAdditonalPrompt(e.target.value)}
+            onChange={(e) => setAdditionalPrompt(e.target.value)}
           ></textarea>
 
           <DropdownMenu
