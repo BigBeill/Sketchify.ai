@@ -170,17 +170,18 @@ const SketchPad = () => {
   };
   
   const clearCanvas = () => {
-  const ctx = ctxRef.current;
-  // First clear the canvas
-  ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  // Then fill with white background
-  ctx.fillStyle = "#FFFFFF";
-  ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-  
+    const ctx = ctxRef.current;
+    // First clear the canvas
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    // Then fill with white background
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    
 
-  const currentState = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
-  setUndoStack(prev => [...prev, currentState]);
-};
+    const currentState = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
+    setUndoStack(prev => [...prev, currentState]);
+  };
+  
    const undo = () => {
     if (undoStack.length > 0) {
       const ctx = ctxRef.current;
