@@ -73,11 +73,15 @@ The Sketchpad component consists of 3 important components:
   - DrawingCanvas
   - LLMSettings
 
-By default all three of these components are placed from left to right inside of the SketchpadContainer component
-However, when full screen mode is selected ActiveCanvas will consume all of the screen space available and PencilToolSettings as well as LLMSettings will be placed inside the SlidingMenu component
+The coordination and organization of these components are managed by SketchpadContainer
 */
 
-// menu for selecting how you want your drawing tool to interact with the sketchpad
+/*
+PencilToolSettings:
+  - Manages the changes made to the drawing tool settings
+  - The settings themselves are stored inside the parent component, this component just manages the logic behind changing them
+  - HTML handles the UI for the drawing tool settings
+*/
 const PencilToolSettings = ({lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}) => {
 
 
@@ -90,9 +94,9 @@ const PencilToolSettings = ({lineWidth, setLineWidth, currentColor, setCurrentCo
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'e' || e.key === 'E') {
-        setActiveTool((oldTool) => { oldTool === 'eraser' ? null : 'eraser' });
+        setActiveTool((oldTool) => (oldTool === 'eraser' ? null : 'eraser'));
       } else if (e.key === 'p' || e.key === 'P') {
-        setActiveTool((oldTool) => { oldTool === 'freehand' ? null : 'freehand' });
+        setActiveTool((oldTool) => (oldTool === 'freehand' ? null : 'freehand'));
       }
     };
 
@@ -253,7 +257,12 @@ const PencilToolSettings = ({lineWidth, setLineWidth, currentColor, setCurrentCo
   )
 }
 
-// the physical sketchpad the user will be drawing on
+/*
+  DrawingCanvas:
+    - Manages logic for modifications made to the canvas by the user
+    - Old states of the canvas are stored in this components, however the canvas references themselves are passed down by the parent
+    - HTML handles the UI for the actual canvas
+*/
 const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, activeTool}) => {
 
   const [undoStack, setUndoStack] = useState([]); // keep track of all old instances of the canvas
@@ -547,7 +556,12 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
 
 }
 
-// menu for how you want the LLM to interact with your drawing
+/*
+  LLMSettings:
+    - Manages all settings regarding the AI's behavior
+    - Logic consists of calling the API through a function managed by SketchpadContainer
+    - HTML handles the UI for AI behavior settings
+*/
 const LLMSettings = ({ isLoading, HandleAPICall }) => {
 
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -614,12 +628,12 @@ const LLMSettings = ({ isLoading, HandleAPICall }) => {
   )
 }
 
-// sliding menu is for when this component is in full screen mode
-const SlidingMenu = () => {
-
-}
-
-// organizes all the above components into one unified ui
+/*
+  SketchpadContainer: 
+    - Manages the coordination between PencilToolSettings, DrawingCanvas, LLMSettings, and the server
+    - Canvas references, drawing tool settings, and logic for calling the API are stored in this component
+    - HTML handles divvying up space between its 3 child components (PencilToolSettings, DrawingCanvas, and LLMSettings)
+*/
 const SketchpadContainer = () => {
 
   const [isLoading, setIsLoading] = useState(false);
