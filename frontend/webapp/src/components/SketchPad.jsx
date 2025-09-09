@@ -70,7 +70,7 @@ const DropdownMenu = ({
 /*
 The Sketchpad component consists of 3 important components:
   - PencilToolSettings
-  - ActiveCanvas
+  - DrawingCanvas
   - LLMSettings
 
 By default all three of these components are placed from left to right inside of the SketchpadContainer component
@@ -254,7 +254,7 @@ const PencilToolSettings = ({lineWidth, setLineWidth, currentColor, setCurrentCo
 }
 
 // the physical sketchpad the user will be drawing on
-const ActiveCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, activeTool}) => {
+const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, activeTool}) => {
 
   const [undoStack, setUndoStack] = useState([]); // keep track of all old instances of the canvas
   const [lineStart, setLineStart] = useState(null);
@@ -411,7 +411,7 @@ const ActiveCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, ac
       setLineStart(pos);
     } else if (activeTool === "freehand" || activeTool === "eraser") {
       ctx.globalCompositeOperation =
-        activeTool === "eraser" ? "destination-out" : "source-over";
+        activeTool === "eraser" ? "#FFFFFF" : "source-over";
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
       setIsDrawing(true);
@@ -742,7 +742,7 @@ const SketchpadContainer = () => {
     <div className="text-gray-900 flex flex-col md:flex-row items-center py-8 justify-center px-4">
       <div className="mt-6 flex flex-col md:flex-row md:gap-6 w-full">
         <PencilToolSettings {...{lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}}/>
-        <ActiveCanvas {...{canvasRef, ctxRef, isLoading, activeTool, lineWidth, currentColor}}/>
+        <DrawingCanvas {...{canvasRef, ctxRef, isLoading, activeTool, lineWidth, currentColor}}/>
         <LLMSettings {...{isLoading, HandleAPICall}}/>
       </div>
     </div>
