@@ -19,6 +19,7 @@ import Circle from "../../public/circleTool.png";
 import Bucket from "../../public/bucketTool.png";
 import Eraser from "../../public/eraserTool.png";
 
+// code for a dropdown menu (used in the LLMSettings component)
 const DropdownMenu = ({
   id,
   label,
@@ -66,27 +67,200 @@ const DropdownMenu = ({
   );
 };
 
-const SketchPad = () => {
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [activeTool, setActiveTool] = useState(null);
+/*
+The Sketchpad component consists of 3 important components:
+  - PencilToolSettings
+  - ActiveCanvas
+  - LLMSettings
+
+By default all three of these components are placed from left to right inside of the SketchpadContainer component
+However, when full screen mode is selected ActiveCanvas will consume all of the screen space available and PencilToolSettings as well as LLMSettings will be placed inside the SlidingMenu component
+*/
+
+// menu for selecting how you want your drawing tool to interact with the sketchpad
+const PencilToolSettings = ({lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}) => {
+
+
+  // setActiveTool but will deselect a tool if the tool selected is the activeTool
+  const toggleTool = (toolName) => {
+    setActiveTool(activeTool === toolName ? null : toolName);
+  };
+
+  // add an event listener for handling keyboard shortcut events
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'e' || e.key === 'E') {
+        setActiveTool((oldTool) => { oldTool === 'eraser' ? null : 'eraser' });
+      } else if (e.key === 'p' || e.key === 'P') {
+        setActiveTool((oldTool) => { oldTool === 'freehand' ? null : 'freehand' });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  return (
+    <div className="flex flex-col bg-primary text-white p-4 rounded-lg w-full md:w-auto">
+      <div className="grid grid-cols-2 gap-4">
+        {/* Color and Line Width Controls */}
+        <div className="col-span-2 flex-col justify-between items-center mb-4 w-full">
+          <div className="flex items-center">
+            <input
+              type="color"
+              value={currentColor}
+              onChange={(e) => setCurrentColor(e.target.value)}
+              className="w-6 h-6 cursor-pointer"
+            />
+            <span className="text-white ml-2 font-fraunces">Color</span>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={lineWidth}
+              onChange={(e) => setLineWidth(e.target.value)}
+              className="w-24"
+      
+            />
+            <span className="text-white ml-2">{lineWidth}</span>
+          </div>
+        </div>
+
+        {/* Tool Buttons in 2x4 Grid */}
+        <button
+          className={`text-white p-4 rounded-lg font-fraunces ${
+            activeTool === "freehand" ? "bg-secondary" : "bg-primary hover:bg-secondary"
+          }`}
+          onClick={() => toggleTool("freehand")}
+        >
+          <img
+            src={Pencil.src}
+            style={{
+              width: "60px",
+              height: "auto",
+              filter: "brightness(0) invert(1)"
+            }}
+            alt="Freehand"
+            className="mx-auto block"
+          />
+        </button>
+        <button
+          className={`text-white p-2 rounded-lg font-fraunces ${
+            activeTool === "line" ? "bg-secondary" : "bg-primary hover:bg-secondary"
+          }`}
+          onClick={() => toggleTool("line")}
+        >
+          <img
+            src={Line.src}
+            style={{
+              width: "60px",
+              height: "auto",
+              filter: "brightness(0) invert(1)"
+            }}
+            alt="Line"
+            className="mx-auto block"
+          />
+        </button>
+        <button
+          className={`text-white p-2 rounded-lg font-fraunces ${
+            activeTool === "square" ? "bg-secondary" : "bg-primary hover:bg-secondary"
+          }`}
+          onClick={() => toggleTool("square")}
+        >
+          <img
+            src={Square.src}
+            style={{
+              width: "60px",
+              height: "auto",
+              filter: "brightness(0) invert(1)"
+            }}
+            alt="Square"
+            className="mx-auto block"
+          />
+        </button>
+        <button
+          className={`text-white p-2 rounded-lg font-fraunces ${
+            activeTool === "triangle" ? "bg-secondary" : "bg-primary hover:bg-secondary"
+          }`}
+          onClick={() => toggleTool("triangle")}
+        >
+          <img
+            src={Triangle.src}
+            style={{
+              width: "60px",
+              height: "auto",
+              filter: "brightness(0) invert(1)"
+            }}
+            alt="Triangle"
+            className="mx-auto block"
+          />
+        </button>
+        <button
+          className={`text-white p-2 rounded-lg font-fraunces ${
+            activeTool === "circle" ? "bg-secondary" : "bg-primary hover:bg-secondary"
+          }`}
+          onClick={() => toggleTool("circle")}
+        >
+          <img
+            src={Circle.src}
+            style={{
+              width: "60px",
+              height: "auto",
+              filter: "brightness(0) invert(1)"
+            }}
+            alt="Circle"
+            className="mx-auto block"
+          />
+        </button>
+        <button
+          className={`text-white p-2 rounded-lg font-fraunces ${
+            activeTool === "bucket" ? "bg-secondary" : "bg-primary hover:bg-secondary"
+          }`}
+          onClick={() => toggleTool("bucket")}
+        >
+          <img
+            src={Bucket.src}
+            style={{
+              width: "60px",
+              height: "auto",
+              filter: "brightness(0) invert(1)"
+            }}
+            alt="Bucket"
+            className="mx-auto block"
+          />
+        </button>
+        <button
+          className={`text-white p-2 rounded-lg font-fraunces ${
+            activeTool === "eraser" ? "bg-secondary" : "bg-primary hover:bg-secondary"
+          }`}
+          onClick={() => toggleTool("eraser")}
+        >
+          <img
+            src={Eraser.src}
+            style={{
+              width: "60px",
+              height: "auto",
+              filter: "brightness(0) invert(1)"
+            }}
+            alt="Eraser"
+            className="mx-auto block"
+          />
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// the physical sketchpad the user will be drawing on
+const ActiveCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, activeTool}) => {
+
+  const [undoStack, setUndoStack] = useState([]); // keep track of all old instances of the canvas
   const [lineStart, setLineStart] = useState(null);
-  const [lineWidth, setLineWidth] = useState(2);
-  const [undoStack, setUndoStack] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [currentColor, setCurrentColor] = useState("#000000");
-  const [ThemeData, Setheme] = useState("Default");
-  const [additionalPrompt, setAdditionalPrompt] = useState(" ");
-  const [complexity, setComplexity] = useState("Standard");
 
-  // Refs
-  const canvasRef = useRef(null);
-  const ctxRef = useRef(null);
-
-  // Auth context
-  const { currentUser } = useAuth();
-
+  // update the dimensions of the canvas to fit onto the current screen
   const updateCanvasSize = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -107,52 +281,27 @@ const SketchPad = () => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   };
 
+  // setup the canvas to always utilize the max amount of space its given, and define canvas references
   useEffect(() => {
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    const aspectRatio = 700 / 1080;
-    canvas.width = 1080;
-    canvas.height = 700;
-    canvas.style.width = "100%";
-
     updateCanvasSize();
-    ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.lineWidth = lineWidth;
-    ctx.lineCap = "round";
-    ctx.strokeStyle = currentColor;
-    ctx.fillStyle = "#FFFFFF";
-
-    ctxRef.current = ctx;
+    ctxRef.current = canvasRef?.current?.getContext("2d");
 
     window.addEventListener("resize", updateCanvasSize);
     return () => window.removeEventListener("resize", updateCanvasSize);
   }, []);
 
+  // update the canvas lineWidth
   useEffect(() => {
-    if (!ctxRef.current) return;
-    ctxRef.current.lineWidth = lineWidth;
-    ctxRef.current.strokeStyle =
-      activeTool === "eraser" ? "#FFFFFF" : currentColor;
-  }, [lineWidth, currentColor, activeTool]);
+    ctxRef.current.lineWidth = lineWidth
+  }, [lineWidth]);
 
-  // Add this useEffect for keyboard shortcuts after your other useEffects
+  // update the canvas strokeStyle (color)
   useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key === 'e' || e.key === 'E') {
-        toggleTool('eraser');
-      } else if (e.key === 'p' || e.key === 'P') {
-        toggleTool('freehand');
-      }
-    };
+    if (activeTool === "eraser") { ctxRef.current.strokeStyle = "#FFFFFF"; }
+    else { ctxRef.current.strokeStyle = currentColor; }
+  }, [currentColor, activeTool]);
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, []);
-
+  // gets the pointers current position
   const getMousePos = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     return {
@@ -161,6 +310,7 @@ const SketchPad = () => {
     };
   };
 
+  // add the current state of the canvas to the undoStack
   const saveState = () => {
     const canvas = canvasRef.current;
     const ctx = ctxRef.current;
@@ -168,7 +318,8 @@ const SketchPad = () => {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     setUndoStack((prev) => [...prev, imageData]);
   };
-  
+
+  // set the canvas to blank
   const clearCanvas = () => {
     const ctx = ctxRef.current;
     // First clear the canvas
@@ -177,20 +328,21 @@ const SketchPad = () => {
     ctx.fillStyle = "#FFFFFF";
     ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     
-
-    const currentState = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
-    setUndoStack(prev => [...prev, currentState]);
+    // update the undoStack
+    saveState();
   };
-  
-   const undo = () => {
+
+  // remove the top item in the undo stack and update canvas to equal the new top item
+  const undo = () => {
     if (undoStack.length > 0) {
       const ctx = ctxRef.current;
+      // set the canvas to equal the second item from the top of the undo stack
       const lastState = undoStack[undoStack.length - 1];
       ctx.putImageData(lastState, 0, 0);
+      // remove the top item on the undoStack
       setUndoStack((prev) => prev.slice(0, -1));
     }
   };
-
 
   const hexToRgb = (hex) => {
     const bigint = parseInt(hex.slice(1), 16);
@@ -202,12 +354,14 @@ const SketchPad = () => {
     const ctx = ctxRef.current;
     if (!canvas || !ctx) return;
 
+    // get the current image being displayed on the canvas
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
     const stack = [];
     const pixelPos = (x, y) => (y * canvas.width + x) * 4;
 
+    // get the starting location of floodFill and make sure its inside the canvas
     const x0 = Math.floor(startX);
     const y0 = Math.floor(startY);
     if (x0 < 0 || y0 < 0 || x0 >= canvas.width || y0 >= canvas.height) return;
@@ -331,11 +485,155 @@ const SketchPad = () => {
     }
   };
 
-  const toggleTool = (toolName) => {
-    setActiveTool(activeTool === toolName ? null : toolName);
+  return (
+    <div className="flex-1 border rounded-lg bg-white shadow-md relative w-full min-h-[500px]">
+      <canvas
+        ref={canvasRef}
+
+        onPointerDown={startDrawing}
+        onPointerMove={draw}
+        onPointerUp={stopDrawing}
+        onPointerCancel={stopDrawing}
+
+        className="rounded-lg border-black border-solid touch-none"
+        style={{
+          cursor: activeTool === 'eraser' 
+            ? `url(${Eraser.src}) 0 20, auto`
+            : activeTool === 'freehand'
+            ? `url(${Pencil.src}) 0 20, auto`
+            : activeTool === 'bucket'
+            ? `url(${Bucket.src}) 0 20, auto`
+            : activeTool === 'line'
+            ? `url(${Line.src}) 0 20, auto`
+            : activeTool === 'square'
+            ? `url(${Square.src}) 0 20, auto`
+            : activeTool === 'triangle'
+            ? `url(${Triangle.src}) 0 20, auto`
+            : activeTool === 'circle'
+            ? `url(${Circle.src}) 0 20, auto`
+            : 'default',
+            width: '100%',
+            height: '100%'
+        }}
+      ></canvas>
+
+      {isLoading && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-10">
+          <div className="w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full animate-spin mb-4"></div>
+          <span className="text-white text-6xl font-fraunces">
+            Enhancing....
+          </span>
+        </div>
+      )}
+
+      <div className="absolute bottom-2 right-2 flex gap-2">
+        <button
+          className="bg-gray-800 text-white p-2 rounded-md"
+          onClick={
+            clearCanvas
+          }
+        >
+          Clear 🔲
+        </button>
+        <button
+          className="bg-gray-800 text-white p-2 rounded-md"
+          onClick={undo}
+        >
+          Undo ↩️
+        </button>
+      </div>
+    </div>
+  )
+
+}
+
+// menu for how you want the LLM to interact with your drawing
+const LLMSettings = ({ isLoading, HandleAPICall }) => {
+
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [additionalPrompt, setAdditionalPrompt] = useState(" ");
+  const [themeData, setTheme] = useState("Default");
+  const [complexity, setComplexity] = useState("Standard");
+
+  const handleComplexityChange = (complexity) => {
+    setComplexity(complexity);
+    console.log(complexity);
+  }
+
+  const handleThemeChange = (theme) => {
+    setTheme(theme);
+    console.log(themeData);
   };
 
-  const getCanvasImage = () => canvasRef.current.toDataURL("image/png");
+  const submitFinalImage = () => {
+    HandleAPICall({ additionalPrompt, themeData, complexity });
+  }
+
+  useEffect(() => {
+    console.log("Prompt", additionalPrompt);
+  }, [additionalPrompt]);
+
+  return (
+    <div className="flex flex-col space-y-6 w-full md:w-auto">
+      <textarea
+        className="border border-black placeholder-gray-500 px-3 py-2 rounded-lg bg-background w-full md:w-[300px] h-[250px] resize-none"
+        placeholder="Additional Notes..."
+        onChange={(e) => setAdditionalPrompt(e.target.value)}
+      ></textarea>
+
+      <DropdownMenu
+        id="theme"
+        label="Theme"
+        options={["Realism", "Minimalism", "Abstract", "Cartoon", "Anime"]}
+        openDropdown={openDropdown}
+        setOpenDropdown={setOpenDropdown}
+        onThemeChange={handleThemeChange}
+      />
+      <DropdownMenu
+        id="Quality"
+        label="Image Complexity"
+        options={["HD","Standard"]}
+        openDropdown={openDropdown}
+        setOpenDropdown={setOpenDropdown}
+        onThemeChange={handleComplexityChange}
+      />
+    
+
+      <div className="pt-8">
+        <button
+          className={`w-full md:w-[300px] bg-secondary text-white px-4 py-2 rounded-lg font-fraunces ${
+            isLoading ? "opacity-50" : "opacity-100"
+          }`}
+          onClick={submitFinalImage}
+          disabled={isLoading}
+        >
+          {isLoading ? "Enhancing..." : "Enhance"}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// sliding menu is for when this component is in full screen mode
+const SlidingMenu = () => {
+
+}
+
+// organizes all the above components into one unified ui
+const SketchpadContainer = () => {
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTool, setActiveTool] = useState(null);
+  const [lineWidth, setLineWidth] = useState(2);
+  const [currentColor, setCurrentColor] = useState("#000000");
+
+  const [fullScreen, setFullScreen] = useState(false);
+
+  // Auth context
+  const { currentUser } = useAuth();
+
+  const canvasRef = useRef(null);
+  const ctxRef = useRef(null);
 
   // converts base64 string to Blob for firebase storage
   const base64ToBlob = (base64) => {
@@ -349,21 +647,16 @@ const SketchPad = () => {
     return new Blob([ab], { type: mimeString });
   };
 
-  const handleComplexityChange = (complexity) => {
-	
-	setComplexity(complexity);
-	console.log(complexity);
-  }
-  const handleThemeChange = (theme) => {
-    // Function to handle theme change
-    Setheme(theme);
-
-    console.log(ThemeData);
-  };
-
+  const getCanvasImage = () => canvasRef.current.toDataURL("image/png");
+  
   // Main function to handle API call and image upload to firebase
   // This function is called when the "Enhance" button is clicked
-  const HandleAPICall = async () => {
+  const HandleAPICall = async ({additionalPrompt, themeData, complexity}) => {
+    if (!currentUser) {
+      console.error('Not authenticated');
+      return;
+    }
+
     setIsLoading(true);
 
     const canvasImageDataURL = getCanvasImage();
@@ -383,9 +676,9 @@ const SketchPad = () => {
     
     const response = await CallApi(
       canvasImageDataURL,
-      ThemeData,
+      themeData,
       additionalPrompt,
-	  complexity
+	    complexity
     );
 
     if (!response) {
@@ -420,11 +713,11 @@ const SketchPad = () => {
 
       const postDoc = await addDoc(collection(db, "users", user.uid, "posts"), {
         title:
-          title || `${user.name} ${ThemeData.toLowerCase()} sketch`,
+          title || `${user.name} ${themeData.toLowerCase()} sketch`,
         drawing: originalURL,
         image: enhancedURL,
         createdAt: serverTimestamp(),
-        theme: ThemeData.toLowerCase(),
+        theme: themeData.toLowerCase(),
       });
 
       // Update the same doc with its own ID
@@ -445,261 +738,16 @@ const SketchPad = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("Prompt", additionalPrompt);
-  }, [additionalPrompt]);
-
   return (
     <div className="text-gray-900 flex flex-col md:flex-row items-center py-8 justify-center px-4">
       <div className="mt-6 flex flex-col md:flex-row md:gap-6 w-full">
-        <div className="flex flex-col bg-primary text-white p-4 rounded-lg w-full md:w-auto">
-          <div className="grid grid-cols-2 gap-4">
-            {/* Color and Line Width Controls */}
-            <div className="col-span-2 flex-col justify-between items-center mb-4 w-full">
-              <div className="flex items-center">
-                <input
-                  type="color"
-                  value={currentColor}
-                  onChange={(e) => setCurrentColor(e.target.value)}
-                  className="w-6 h-6 cursor-pointer"
-                />
-                <span className="text-white ml-2 font-fraunces">Color</span>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={lineWidth}
-                  onChange={(e) => setLineWidth(e.target.value)}
-                  className="w-24"
-				  
-                />
-                <span className="text-white ml-2">{lineWidth}</span>
-              </div>
-            </div>
-
-            {/* Tool Buttons in 2x4 Grid */}
-            <button
-              className={`text-white p-4 rounded-lg font-fraunces ${
-                activeTool === "freehand" ? "bg-secondary" : "bg-primary hover:bg-secondary"
-              }`}
-              onClick={() => toggleTool("freehand")}
-            >
-              <img
-                src={Pencil.src}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "brightness(0) invert(1)"
-                }}
-                alt="Freehand"
-                className="mx-auto block"
-              />
-            </button>
-            <button
-              className={`text-white p-2 rounded-lg font-fraunces ${
-                activeTool === "line" ? "bg-secondary" : "bg-primary hover:bg-secondary"
-              }`}
-              onClick={() => toggleTool("line")}
-            >
-              <img
-                src={Line.src}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "brightness(0) invert(1)"
-                }}
-                alt="Line"
-                className="mx-auto block"
-              />
-            </button>
-            <button
-              className={`text-white p-2 rounded-lg font-fraunces ${
-                activeTool === "square" ? "bg-secondary" : "bg-primary hover:bg-secondary"
-              }`}
-              onClick={() => toggleTool("square")}
-            >
-              <img
-                src={Square.src}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "brightness(0) invert(1)"
-                }}
-                alt="Square"
-                className="mx-auto block"
-              />
-            </button>
-            <button
-              className={`text-white p-2 rounded-lg font-fraunces ${
-                activeTool === "triangle" ? "bg-secondary" : "bg-primary hover:bg-secondary"
-              }`}
-              onClick={() => toggleTool("triangle")}
-            >
-              <img
-                src={Triangle.src}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "brightness(0) invert(1)"
-                }}
-                alt="Triangle"
-                className="mx-auto block"
-              />
-            </button>
-            <button
-              className={`text-white p-2 rounded-lg font-fraunces ${
-                activeTool === "circle" ? "bg-secondary" : "bg-primary hover:bg-secondary"
-              }`}
-              onClick={() => toggleTool("circle")}
-            >
-              <img
-                src={Circle.src}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "brightness(0) invert(1)"
-                }}
-                alt="Circle"
-                className="mx-auto block"
-              />
-            </button>
-            <button
-              className={`text-white p-2 rounded-lg font-fraunces ${
-                activeTool === "bucket" ? "bg-secondary" : "bg-primary hover:bg-secondary"
-              }`}
-              onClick={() => toggleTool("bucket")}
-            >
-              <img
-                src={Bucket.src}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "brightness(0) invert(1)"
-                }}
-                alt="Bucket"
-                className="mx-auto block"
-              />
-            </button>
-            <button
-              className={`text-white p-2 rounded-lg font-fraunces ${
-                activeTool === "eraser" ? "bg-secondary" : "bg-primary hover:bg-secondary"
-              }`}
-              onClick={() => toggleTool("eraser")}
-            >
-              <img
-                src={Eraser.src}
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "brightness(0) invert(1)"
-                }}
-                alt="Eraser"
-                className="mx-auto block"
-              />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1 border rounded-lg bg-white shadow-md relative w-full min-h-[500px]">
-          <canvas
-            ref={canvasRef}
-
-            onPointerDown={startDrawing}
-            onPointerMove={draw}
-            onPointerUp={stopDrawing}
-            onPointerCancel={stopDrawing}
-
-            className="rounded-lg border-black border-solid touch-none"
-            style={{
-              cursor: activeTool === 'eraser' 
-                ? `url(${Eraser.src}) 0 20, auto`
-                : activeTool === 'freehand'
-                ? `url(${Pencil.src}) 0 20, auto`
-                : activeTool === 'bucket'
-                ? `url(${Bucket.src}) 0 20, auto`
-                : activeTool === 'line'
-                ? `url(${Line.src}) 0 20, auto`
-                : activeTool === 'square'
-                ? `url(${Square.src}) 0 20, auto`
-                : activeTool === 'triangle'
-                ? `url(${Triangle.src}) 0 20, auto`
-                : activeTool === 'circle'
-                ? `url(${Circle.src}) 0 20, auto`
-                : 'default',
-			width: '100%',
-			height: '100%'
-            }}
-          ></canvas>
-
-          {isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-10">
-              <div className="w-12 h-12 border-4 border-t-4 border-gray-200 rounded-full animate-spin mb-4"></div>
-              <span className="text-white text-6xl font-fraunces">
-                Enhancing....
-              </span>
-            </div>
-          )}
-
-          <div className="absolute bottom-2 right-2 flex gap-2">
-            <button
-              className="bg-gray-800 text-white p-2 rounded-md"
-              onClick={
-                clearCanvas
-              }
-            >
-              Clear 🔲
-            </button>
-            <button
-              className="bg-gray-800 text-white p-2 rounded-md"
-              onClick={undo}
-            >
-              Undo ↩️
-            </button>
-          </div>
-        </div>
-
-        <div className="flex flex-col space-y-6 w-full md:w-auto">
-          <textarea
-            className="border border-black placeholder-gray-500 px-3 py-2 rounded-lg bg-background w-full md:w-[300px] h-[250px] resize-none"
-            placeholder="Additional Notes..."
-            onChange={(e) => setAdditionalPrompt(e.target.value)}
-          ></textarea>
-
-          <DropdownMenu
-            id="theme"
-            label="Theme"
-            options={["Realism", "Minimalism", "Abstract", "Cartoon", "Anime"]}
-            openDropdown={openDropdown}
-            setOpenDropdown={setOpenDropdown}
-            onThemeChange={handleThemeChange}
-          />
-          <DropdownMenu
-            id="Quality"
-            label="Image Complexity"
-            options={["HD","Standard"]}
-            openDropdown={openDropdown}
-            setOpenDropdown={setOpenDropdown}
-			onThemeChange={handleComplexityChange}
-          />
-        
-
-          <div className="pt-8">
-            <button
-              className={`w-full md:w-[300px] bg-secondary text-white px-4 py-2 rounded-lg font-fraunces ${
-                isLoading ? "opacity-50" : "opacity-100"
-              }`}
-              onClick={HandleAPICall}
-              disabled={isLoading}
-            >
-              {isLoading ? "Enhancing..." : "Enhance"}
-            </button>
-          </div>
-        </div>
+        <PencilToolSettings {...{lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}}/>
+        <ActiveCanvas {...{canvasRef, ctxRef, isLoading, activeTool, lineWidth, currentColor}}/>
+        <LLMSettings {...{isLoading, HandleAPICall}}/>
       </div>
     </div>
-  );
-};
+  )
 
-export default SketchPad;
+}
+
+export default SketchpadContainer;
