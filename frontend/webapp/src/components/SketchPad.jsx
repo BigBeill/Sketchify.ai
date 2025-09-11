@@ -263,7 +263,7 @@ const PencilToolSettings = ({lineWidth, setLineWidth, currentColor, setCurrentCo
     - Old states of the canvas are stored in this components, however the canvas references themselves are passed down by the parent
     - HTML handles the UI for the actual canvas
 */
-const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, activeTool}) => {
+const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, activeTool, fullScreen, toggleFullScreen, toggleToolMenu}) => {
 
   const [undoStack, setUndoStack] = useState([]); // keep track of all old instances of the canvas
   const [lineStart, setLineStart] = useState(null);
@@ -293,7 +293,7 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
   // setup the canvas to always utilize the max amount of space its given, and define canvas references
   useEffect(() => {
     updateCanvasSize();
-    ctxRef.current = canvasRef?.current?.getContext("2d");
+    ctxRef.current = canvasRef?.current?.getContext("2d", { willReadFrequently: true });
 
     window.addEventListener("resize", updateCanvasSize);
     return () => window.removeEventListener("resize", updateCanvasSize);
@@ -495,7 +495,7 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
   };
 
   return (
-    <div className="flex-1 border rounded-lg bg-white shadow-md relative w-full min-h-[500px]">
+    <div className={`flex-1 border rounded-lg bg-white shadow-md relative w-full min-h-[500px] max-h-full ${fullScreen ? 'h-full' : ''}`}>
       <canvas
         ref={canvasRef}
 
@@ -546,10 +546,32 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
         </button>
         <button
           className="bg-gray-800 text-white p-2 rounded-md"
-          onClick={undo}
+          onClick={
+            undo
+          }
         >
           Undo ↩️
         </button>
+
+        <button
+          className="bg-gray-800 text-white p-2 rounded-md"
+          onClick={
+            toggleFullScreen
+          }
+        >
+          Fullscreen 🔲
+        </button>
+
+        { fullScreen ? (
+          <button
+            className="bg-gray-800 text-white p-2 rounded-md ml-8"
+            onClick={
+              toggleToolMenu
+            }
+          >
+            Tools 🔲
+          </button>
+        ) : null }
       </div>
     </div>
   )
@@ -642,12 +664,39 @@ const SketchpadContainer = () => {
   const [currentColor, setCurrentColor] = useState("#000000");
 
   const [fullScreen, setFullScreen] = useState(false);
+  const [toolMenuOpen, setToolMenuOpen] = useState(false);
 
   // Auth context
   const { currentUser } = useAuth();
 
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
+
+  const toggleFullScreen = () => {
+    setFullScreen((currentState) => { return !currentState; });
+  };
+
+  useEffect(() => {
+    const { body, documentElement: html } = document;
+  
+    if (fullScreen) {
+      const sw = window.innerWidth - html.clientWidth;
+      body.style.overflow = 'hidden';
+      if (sw > 0) body.style.paddingRight = `${sw}px`;
+    } else {
+      body.style.overflow = '';
+      body.style.paddingRight = '';
+    }
+  
+    return () => {
+      body.style.overflow = '';
+      body.style.paddingRight = '';
+    };
+  }, [fullScreen]);
+
+  const toggleToolMenu = () => {
+    setToolMenuOpen((toolMenuState) => { return !toolMenuState; });
+  };
 
   // converts base64 string to Blob for firebase storage
   const base64ToBlob = (base64) => {
@@ -754,11 +803,36 @@ const SketchpadContainer = () => {
 
   return (
     <div className="text-gray-900 flex flex-col md:flex-row items-center py-8 justify-center px-4">
-      <div className="mt-6 flex flex-col md:flex-row md:gap-6 w-full">
-        <PencilToolSettings {...{lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}}/>
-        <DrawingCanvas {...{canvasRef, ctxRef, isLoading, activeTool, lineWidth, currentColor}}/>
-        <LLMSettings {...{isLoading, HandleAPICall}}/>
-      </div>
+      { !fullScreen ? ( 
+        /* DEFAULT SKETCHPAD LAYOUT */
+        <div className="mt-6 flex flex-col md:flex-row md:gap-6 w-full">
+          <PencilToolSettings {...{lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}}/>
+          <DrawingCanvas {...{canvasRef, ctxRef, isLoading, activeTool, lineWidth, currentColor, fullScreen, toggleFullScreen, toggleToolMenu }}/>
+          <LLMSettings {...{isLoading, HandleAPICall}}/>
+        </div>
+      ) : ( 
+        /* FULLSCREEN SKETCHPAD LAYOUT */
+        <>
+          {/* canvas */}
+          <div 
+            className={`fixed inset-0 p-4 z-30 bg-black/60 ${toolMenuOpen ? '[&>*]:pointer-events-none' : '' }`}
+            onClick={() => { if(toolMenuOpen) { setToolMenuOpen(false); } }}
+          >
+            <DrawingCanvas {...{canvasRef, ctxRef, isLoading, activeTool, lineWidth, currentColor, fullScreen, toggleFullScreen, toggleToolMenu }}/>
+          </div>
+
+          {/* sliding menu settings */}
+          <aside
+            className={`fixed inset-y-0 right-0 z-40 w-100 max-w-[90vw] bg-neutral-900/95 text-white shadow-2xl transition-transform duration-300 ease-out ${toolMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}`}
+            aria-hidden={!toolMenuOpen}
+          >
+            <div className="h-full overflow-auto p-4 space-y-6">
+              <PencilToolSettings {...{lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}}/>
+              <LLMSettings {...{isLoading, HandleAPICall}}/>
+            </div>
+          </aside>
+        </>
+      )}
     </div>
   )
 
