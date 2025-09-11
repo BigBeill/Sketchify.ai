@@ -826,7 +826,7 @@ const SketchpadContainer = () => {
             className={`fixed inset-y-0 right-0 z-40 w-100 max-w-[90vw] bg-neutral-900/95 text-white shadow-2xl transition-transform duration-300 ease-out ${toolMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'}`}
             aria-hidden={!toolMenuOpen}
           >
-            <div className="h-full overflow-auto p-4 space-y-6">
+            <div className="text-gray-900 h-full overflow-auto p-4 space-y-6">
               <PencilToolSettings {...{lineWidth, setLineWidth, currentColor, setCurrentColor, activeTool, setActiveTool}}/>
               <LLMSettings {...{isLoading, HandleAPICall}}/>
             </div>
