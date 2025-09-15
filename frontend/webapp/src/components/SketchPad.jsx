@@ -427,6 +427,7 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
 
     if (["line", "square", "triangle", "circle"].includes(activeTool)) {
       setLineStart(pos);
+      setIsDrawing(true);
     } else if (activeTool === "freehand" || activeTool === "eraser") {
       ctx.globalCompositeOperation =
         activeTool === "eraser" ? "#FFFFFF" : "source-over";
@@ -443,8 +444,11 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
   const draw = (e) => {
     if (!isDrawing) return;
     const pos = getMousePos(e);
-    ctxRef.current.lineTo(pos.x, pos.y);
-    ctxRef.current.stroke();
+    if (activeTool === "freehand" || activeTool === "eraser") {
+      ctxRef.current.lineTo(pos.x, pos.y);
+      ctxRef.current.stroke();
+    }
+    else if (["line", "square", "triangle", "circle"].includes(activeTool)) { previewShape(e); }
   };
 
   const stopDrawing = (e) => {
@@ -501,7 +505,58 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
       ctx.closePath();
       setIsDrawing(false);
     }
-  };
+  }
+
+  const previewShape = (e) => {
+    const pos = getMousePos(e);
+    const ctx = ctxRef.current;
+    ctx.globalCompositeOperation = "source-over";
+
+    const baseState = undoStack[undoStack.length - 1];
+    ctx.putImageData(baseState, 0, 0);
+
+    if (activeTool === "line") {
+      ctx.beginPath();
+      ctx.moveTo(lineStart.x, lineStart.y);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+    } 
+    else if (activeTool === "square") {
+      const x = Math.min(lineStart.x, pos.x);
+      const y = Math.min(lineStart.y, pos.y);
+      const width = Math.abs(pos.x - lineStart.x);
+      const height = Math.abs(pos.y - lineStart.y);
+      ctx.strokeRect(x, y, width, height);
+    } 
+    else if (activeTool === "triangle") {
+      const x1 = lineStart.x;
+      const y1 = lineStart.y;
+      const x2 = pos.x;
+      const y2 = pos.y;
+
+      const topX = (x1 + x2) / 2;
+      const topY = Math.min(y1, y2);
+      const baseY = Math.max(y1, y2);
+
+      ctx.beginPath();
+      ctx.moveTo(topX, topY);
+      ctx.lineTo(x1, baseY);
+      ctx.lineTo(x2, baseY);
+      ctx.closePath();
+      ctx.stroke();
+    } 
+    else if (activeTool === "circle") {
+      const dx = pos.x - lineStart.x;
+      const dy = pos.y - lineStart.y;
+      const radius = Math.sqrt(dx * dx + dy * dy) / 2;
+      const centerX = (lineStart.x + pos.x) / 2;
+      const centerY = (lineStart.y + pos.y) / 2;
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+  }
 
   return (
     <div className={`flex-1 border rounded-lg bg-white shadow-md relative w-full min-h-[500px] max-h-full ${fullScreen ? 'h-full' : ''}`}>
