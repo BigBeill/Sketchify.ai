@@ -383,6 +383,15 @@ const DrawingCanvas = ({canvasRef, ctxRef, isLoading, lineWidth, currentColor, a
       data[startIdx + 3],
     ];
 
+    if (
+      startColor[0] === fillColor[0] &&
+      startColor[1] === fillColor[1] &&
+      startColor[2] === fillColor[2] &&
+      startColor[3] === 255 // based on how our color pallet is set up this value should always be 255
+    ) {
+      return; 
+    }
+
     const matchColor = (idx) =>
       data[idx] === startColor[0] &&
       data[idx + 1] === startColor[1] &&
